@@ -1,9 +1,11 @@
 import os
 import unreal
+import json
+
 
 file_is_updated = False
 file_up_to_date = False
-txt_file = r"Z:\BERG\CENTRALTEST\Content\Python\TestScripts\modification.txt"  # Output file to store modification dates
+json_file = r"Z:\BERG\CENTRALTEST\Content\Python\TestScripts\modification.json"  # Output file to store modification dates
 directory_to_check = r"M:\IRAS\BERG\KTOFB"
 extension = ".fbx"
 
@@ -11,8 +13,8 @@ def file_update_checker_fun():
     global file_is_updated
     global file_up_to_date
     previous_modification_dates={}
-    if os.path.exists(txt_file):
-        with open(txt_file, 'r') as file:
+    if os.path.exists(json_file):
+        with open(json_file, 'r') as file:
             for line in file:
                 file_path, modification_time = line.strip().split(": ")
                 previous_modification_dates[file_path] = float(modification_time)
@@ -59,7 +61,7 @@ def import_files_from_txt(txt_file_to_open_from):
                 importAlembic(file_path)
 
 
-def importAlembic():
+def importAlembic(filename):
 
     task = unreal.AssetImportTask()
 
@@ -85,6 +87,6 @@ def importAlembic():
 file_update_checker_fun()
 
 if file_is_updated == True:
-    update_file_status(directory_to_check, extension, txt_file)
-    import_files_from_txt(txt_file)
+    update_file_status(directory_to_check, extension, json_file)
+    import_files_from_txt(json_file)
 
