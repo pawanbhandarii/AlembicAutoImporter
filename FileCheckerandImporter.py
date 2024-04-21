@@ -13,11 +13,13 @@ def file_update_checker_fun():
     global file_is_updated
     global file_up_to_date
     previous_modification_dates={}
+    
     if os.path.exists(json_file):
         with open(json_file, 'r') as file:
-            for line in file:
-                file_path, modification_time = line.strip().split(": ")
-                previous_modification_dates[file_path] = float(modification_time)
+            previous_modification_dates = json.load(file)
+            #for line in file:
+             #   file_path, modification_time = line.strip().split(": ")
+              #  previous_modification_dates[file_path] = float(modification_time)
                 
     # Check modification dates of files in the directory
     current_modification_dates = {}
@@ -25,12 +27,17 @@ def file_update_checker_fun():
         for file_name in files:
             if file_name.lower().endswith(extension):
                 file_path = os.path.join(root, file_name)
-                current_modification_dates[file_path] = os.path.getmtime(file_path)
+                modification_time =  os.path.getmtime(file_path)
+                current_modification_dates[file_path] = {
+                    "modification_date": modification_time
+                    #rest properties such as isFBX?, isABC?, isAnimation?, start_frame and end frame should be updated by the maya python API when exporting these files
+                    
+                }
     
     # Compare modification dates
     file_is_updated = False
     for file_path, current_mod_time in current_modification_dates.items():
-        if file_path not in previous_modification_dates or previous_modification_dates[file_path] < current_mod_time:
+        if file_path not in previous_modification_dates or previous_modification_dates[file_path]["modification_date"]<current_mod_time["modification_date"]:
             file_is_updated = True
             break
     
@@ -41,17 +48,20 @@ def file_update_checker_fun():
         file_up_to_date = True
         print("Files are up to date.")
 
-def update_file_status(directory, extension, output_file):
-    with open(output_file, 'w') as file:
+def update_file_status(directory, extension, output_json):
+    modification_data = {} #??
+    with open(output_json, 'w') as file:
         # Walk through the directory tree
         for root, dirs, files in os.walk(directory):
             for file_name in files:
                 if file_name.lower().endswith(extension):
                     file_path = os.path.join(root, file_name)
                     modification_time = os.path.getmtime(file_path)
-                    file.write(f"{file_path}: {modification_time}\n")
+                    modification_data[file_path] = {
+                        "modification_date":modification_time
+                    }
     
-    print("Modification dates written to", output_file)
+    print("Modification dates written to", output_json)
 
 def import_files_from_txt(txt_file_to_open_from):
     with open(txt_file_to_open_from, 'r') as file:
